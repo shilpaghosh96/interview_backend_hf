@@ -1,89 +1,158 @@
 # Interview Feedback AI
 
-An end-to-end AI-powered web app that analyzes mock interview recordings and provides structured, actionable feedback.
-
 ## Overview
 
-Interview Feedback AI allows users to upload or record interview audio and receive:
+Interview Feedback AI is an end-to-end AI-powered web application that analyzes mock interview recordings and generates structured, actionable feedback.
 
-- A full interview transcript
-- Extracted interview question-answer pairs
-- Strengths and weaknesses analysis
-- Personalized recommendations for improvement
-- Detailed Q/A-level feedback with pros and cons
+The system simulates a real interviewer by evaluating responses, identifying strengths and weaknesses, and providing targeted recommendations for improvement.
 
-The goal is to simulate a real interviewer’s feedback process and help candidates improve their interview performance.
+This project was built independently outside of coursework to solve a real problem: helping candidates practice and improve interview performance using AI.
+
+---
+
+## Features
+
+- 🎤 Upload or record interview audio
+- 📝 Automatic speech-to-text transcription
+- 🔍 Extraction of interview Q/A pairs
+- ✅ Strengths identification
+- ⚠️ Weakness detection
+- 🚀 Personalized recommendations
+- 🧠 Detailed Q/A-level feedback with pros and cons
+- 📊 Structured JSON-based output for reliability
+
+---
 
 ## Architecture
 
 ### Frontend
-
-- HTML
-- CSS
-- JavaScript
-- Lightweight interface for recording/uploading audio and viewing feedback
-- Served directly through the FastAPI backend
+- HTML, CSS, JavaScript
+- Simple, lightweight UI
+- Handles audio upload/recording and displays results
+- Served directly by FastAPI (no separate hosting required)
 
 ### Backend
-
-- Python
-- FastAPI
-- Handles audio upload, transcription, transcript chunking, and AI analysis
+- Python + FastAPI
+- Handles:
+  - Audio ingestion
+  - Transcription
+  - Chunking
+  - AI analysis
 
 ### AI Pipeline
 
-1. Audio is uploaded or recorded from the frontend.
-2. The backend transcribes the audio using `faster-whisper`.
-3. The transcript is split into smaller chunks for long interviews.
-4. A local LLM through Ollama extracts interview Q/A pairs.
-5. A second analysis step generates:
+1. Audio is uploaded or recorded
+2. Transcription using `faster-whisper`
+3. Transcript is split into chunks (for long interviews)
+4. Local LLM (via Ollama) extracts Q/A pairs
+5. Final evaluation step generates:
    - Strengths
    - Weaknesses
    - Recommendations
-   - Detailed Q/A feedback
+   - Detailed analysis
+
+---
 
 ## Tech Stack
 
 - Python
 - FastAPI
 - faster-whisper
-- Ollama
-- Local LLMs such as Llama 3
-- HTML
-- CSS
-- JavaScript
+- Ollama (local LLM)
+- Llama 3 / Llama 3.1
+- HTML / CSS / JavaScript
 - Uvicorn
+
+---
 
 ## Deployment
 
-- Backend: FastAPI app deployed on Hugging Face Spaces / Render
-- Frontend: Static HTML/CSS/JavaScript served directly by FastAPI
-- LLM: Runs locally using Ollama during development
+- **Backend:** FastAPI (deployed on Hugging Face Spaces / Render during testing)
+- **Frontend:** Static files served via FastAPI
+- **LLM:** Local via Ollama (no API cost)
 
-## Key Features
+---
 
-- Upload interview audio
-- Record interview audio from the browser
-- Automatic speech-to-text transcription
-- Long transcript chunking for 1–1.5 hour interviews
-- Structured JSON-based AI feedback
-- Strengths, weaknesses, and recommendations
-- Detailed Q/A analysis with pros and cons
-- Lightweight frontend with no separate frontend hosting required
+## How I Use AI Agents in This Project
 
-## Challenges Solved
+This project uses a **multi-step AI agent-style workflow**:
 
-- Handling long audio files through transcript chunking and batching
-- Improving reliability of local LLM JSON outputs
-- Extracting meaningful Q/A pairs from messy interview transcripts
-- Reducing hallucinated or placeholder outputs
-- Debugging FastAPI, Whisper, and Ollama integration issues
-- Serving frontend and backend from the same application
+- **Agent 1 (Extraction Agent):**  
+  Extracts structured Q/A pairs from raw transcripts
+
+- **Agent 2 (Evaluation Agent):**  
+  Analyzes responses to generate:
+  - Strengths
+  - Weaknesses
+  - Recommendations
+  - Detailed feedback
+
+- **Orchestration Layer:**  
+  Handles:
+  - Transcript chunking
+  - Batch processing
+  - Output validation (strict JSON enforcement)
+  - Error handling and retries
+
+This modular pipeline ensures:
+- Scalability for long interviews (1–1.5 hours)
+- More reliable outputs compared to single-prompt approaches
+- Better control over hallucinations and formatting
+
+---
+
+## Key Challenges Solved
+
+- Handling long interview recordings efficiently
+- Preventing LLM output truncation
+- Ensuring strict JSON outputs from local models
+- Extracting meaningful Q/A from noisy transcripts
+- Debugging Whisper + Ollama + FastAPI integration
+- Serving frontend and backend together seamlessly
+
+---
 
 ## How to Run Locally
 
-### 1. Clone the repository
+### 1. Clone the repo
 
 ```bash
-git clone <your-repo-link>
+git clone https://github.com/shilpaghosh96/interview_backend_hf.git
 cd interview_backend_hf
+```
+
+## Install dependencies
+pip install -r backend/requirements.txt
+
+## Start Ollama
+ollama run llama3.1:8b
+
+## Run backend
+uvicorn backend.app.main_assembly_ai:app --host 127.0.0.1 --port 8000 --reload
+
+## Open the app
+http://127.0.0.1:8000
+
+## Example Output
+{
+  "strengths": [
+    "Clear explanation of technical concepts",
+    "Strong product-building mindset"
+  ],
+  "weaknesses": [
+    "Incorrect explanation of cross-entropy loss",
+    "Some answers lacked depth"
+  ],
+  "recommendations": [
+    "Review key ML loss functions with examples",
+    "Use structured answer format: definition → intuition → formula → example"
+  ]
+}
+
+## Future Improvements
+Speaker diarization (interviewer vs candidate)
+Real-time feedback streaming
+PDF report generation
+Improved frontend UX
+Cloud-based LLM fallback
+Interview-type specific evaluation (behavioral vs technical)
